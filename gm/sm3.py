@@ -37,7 +37,7 @@ def padding(msg):
     m = m + '1'
     m = m + '0'*(448-len(m)%512) + l_bin
     m = hex(int(m,2))[2:]
-    print("msg after padding:",m)
+    # print("msg after padding:",m)
     return m
 
 
@@ -63,9 +63,9 @@ def expansion(M,n):
         Wstr += (hex(x)[2:] + ' ')
     for x in W_:
         W_str+= (hex(x)[2:] + ' ')
-    print("B({}) after padding:".format(n+1))
-    print("W:",Wstr)
-    print("W':",W_str)
+    # print("B({}) after padding:".format(n+1))
+    # print("W:",Wstr)
+    # print("W':",W_str)
     return W,W_
 
 def CF(V,M,i):
@@ -84,8 +84,8 @@ def CF(V,M,i):
         G = left_cycle_shift(F,19)
         F = E
         E = P0(TT2)
-        print("j={}:".format(j))
-        print(hex(A),hex(B),hex(C),hex(D),hex(E),hex(F),hex(G),hex(H))
+        # print("j={}:".format(j))
+        # print(hex(A),hex(B),hex(C),hex(D),hex(E),hex(F),hex(G),hex(H))
     a,b,c,d,e,f,g,h = V[i]
     V_ = [a^A,b^B,c^C,d^D,e^E,f^F,g^G,h^H]
     return V_
@@ -101,7 +101,7 @@ def SM3(msg):
     Vn=V[n]
     for x in Vn:
         result += (hex(x)[2:]+' ')
-    print("杂凑值:",result)
+    # print("hash_value:",result)
     return result
 
 
