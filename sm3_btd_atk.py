@@ -8,6 +8,7 @@ TRUNC = 8
 char_set = string.ascii_letters+string.digits
 trial_times = 0
 record = {}
+MAX_TRIAL=12000000
 
 def reduced_sm3(m):
     return sm3.SM3(m)[:TRUNC]
@@ -24,8 +25,8 @@ def get_random_input():
 hash = ''
 random_input = ''
 
-for i in range(1200000):
-    print(trial_times)
+for i in range(MAX_TRIAL):
+    # print(trial_times)
     trial_times+=1
     random_input = get_random_input()
     hash = reduced_sm3(random_input)
@@ -44,5 +45,13 @@ for i in range(1200000):
 
 colliding=record[hash]
 colliding_hash=reduced_sm3(colliding)
-print(colliding,random_input)
-print(colliding_hash)
+#print(colliding,random_input)
+#print(colliding_hash)
+
+print('Collision Results')
+print("collision:", colliding_hash)
+print("Number of evaluations made: ", str(trial_times))
+print("Time Taken: %.2f seconds" % (time.time() - start_time))
+print(colliding+' | '+sm3.SM3(colliding)+'\n')
+print(random_input+' | '+sm3.SM3(random_input))
+
