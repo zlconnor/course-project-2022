@@ -100,7 +100,7 @@ def SM3(msg):
         V.append(CF(V,M,i))
     Vn=V[n]
     for x in Vn:
-        result += (hex(x)[2:]+' ')
+        result += (hex(x)[2:])
     # print("hash_value:",result)
     return result
 
