@@ -1,11 +1,6 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<malloc.h>
 
+#include "sm3.h"
 
-unsigned int IV[8] = { 0 };//initial vector
-unsigned int T[64] = { 0 };//T array
-unsigned char B[64] = { 0 };//block B(i)
 
 
 unsigned int left_cycle_shift(unsigned int val, unsigned int n)//cycle shift left
@@ -192,20 +187,4 @@ int SM3(unsigned char* m, unsigned int len, unsigned char* hash_val)
 	char2hex();
 	char2str(hash_val);
 	return 1;
-}
-int main()
-{
-	unsigned char hash_value[32] = { 0 };
-	int len;
-	char* str = "abc";
-	//66c7f0f4 62eeedd9 d1f2d46b dc10e4e2 4167c487 5cf2f7a2 297da02b 8f4ba8e0
-	len = strlen(str);
-	if (!SM3(str, len, hash_value))
-		printf("1 false\n");
-	char* str2 = "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd";
-	//debe9ff9 2275b8a1 38604889 c18e5a4d 6fdb70e5 387e5765 293dcba3 9c0c5732
-	len = strlen(str2);
-	if (!SM3(str2, len, hash_value))
-		printf("2 false\n");
-	return 0;
 }
