@@ -1,118 +1,69 @@
-# SM2 impl
-# 参数定义
-import math
-
-params = {
-    'p': 'FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF',
-    'a': 'FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC',
-    'b': '28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93',
-    'n': 'FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123',
-    'xg': '32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7',
-    'yg': 'BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0'
-}
-
-
-# 有限域上的椭圆曲线在点加运算下构成优先交换群 阶与基域规模相近
-# 倍点运算构成单向函数 多倍点与基点 椭圆曲线离散对数问题
-
-# 4.2数据类型转换
-# 4.2.2 整数到字节串
-# input:非负整数x和字节串目标长度k
-# output:长度为k的字节串M
-
-
-def int2bytes(x, k):
-    M = []
-    # 每次取出最低8位并右移8位 高位补0
-    for i in range(0, k):
-        M.append(x >> (i * 8) & 0xff)
-    M.reverse()
-    return M
-
-
-# 4.2.3 字节串到整数
-# input:长度为k的字节串M
-# output:整数x
-
-
-def bytes2int(M):
-    x = 0
-    for b in M:
-        # 对每一个字节左移8位并加上新的字节串对应的整数值
-        x = x * 256 + int(b)
-    return x
-
-
-# 4.2.4 比特串到字节串
-# input:长度为k的字节串M
-
-
-def bits2bytes(s):
-    if s[0:2] == '0b':
-        s = s[2:]
-        m = len(s)
-        k = math.ceil(m / 8)
-        M = []
-        for i in range(0, k):
-            temp = ''
-            j = 0
-            while j < 8:
-                if (8 * i + j >= m):
-                    temp = temp + '0'
-                else:
-                    temp = temp + s[m - (8 * i + j) - 1:m - (8 * i + j)]
-                j = j + 1
-            temp = temp[::-1]
-            temp = int(temp, 2)
-            M.append(temp)
-            # M = M + temp
-        M.reverse()
+def point2bit(point, mode=True):
+    """
+    将椭圆曲线上的点转换为比特串
+    :param point: 椭圆曲线上的点坐标
+    :param mode: 值为true时转换C1；值为False转换其他点
+    :return: 椭圆曲线上的点对应的二进制串
+    """
+    x = point[0]
+    y = point[1]
+    pc = '00000100'  # 单一字节 04
+    x_binary = bin(x)[2:].zfill(256)
+    y_binary = bin(y)[2:].zfill(256)
+    # 若为C1
+    if mode:
+        return pc + x_binary + y_binary
     else:
+        return x_binary + y_binary, x_binary, y_binary
+
+
+def bin_xor(a_binary, b_binary):
+    if len(a_binary) != len(b_binary):
         return -1
-    return M
+    res = ''
+    length = len(a_binary)
+    for i in range(length):
+        res += str(int(a_binary[i]) ^ int(b_binary[i]))
+    return res
 
 
-# 字节串到比特串
-def bytes2bits(M):
-    k = len(M)
-    m = 8 * k
-    tmp = ''
-    s = 0
-    M.reverse()
-    j = 0
-    for i in M:
-        s += i * pow(256, j)
-        j += 1
-    s = bin(s)
+def hex2point(s_hex, mode=True):
+    """
+    :param s_hex: 十六进制字符串
+    :param mode: 为True时转换C1 为False转换其他
+    :return: 对应的点
+    """
+    x = int(s_hex[-128:-64], 16)
+    y = int(s_hex[-64:], 16)
+
+    if mode:
+        if int(s_hex[:2], 16) == 4:
+            return x, y
+        else:
+            return False
+    else:
+        return x, y
 
 
-# 域元素到字节串
-def elem2bytes(alpha):
-    S = []
-    q = 0
+def mod_inverse(n, p):
+    a = [0] * 1000  # 注意 1000 可能不够长，适时调整即可
+    b = [0] * 1000
+    a[0] = p
+    b[0] = n
+    i = 0
+    while a[i] % b[i]:
+        a[i + 1] = b[i]
+        b[i + 1] = a[i] % b[i]
+        i += 1
+    i -= 1
+    div_a = 1
+    div_b = -(a[i] // b[i])
+    while i != -1:
+        if i >= 1:
+            tmp = div_a
+            div_a = div_b
+            div_b = tmp - a[i - 1] // b[i - 1] * div_b
 
+        i -= 1
 
-# 字节串到域元素
-def bytes2elem():
-    pass
-
-
-# 域元素到整数
-def elem2int():
-    pass
-
-
-# 点到字节串
-def point2bytes():
-    pass
-
-
-# 字节串到点
-def bytes2point():
-    pass
-
-
-# 椭圆曲线上的点运算
-# 倍乘
-if __name__ == '__main__':
-    print(params)
+    return div_b % a[0]
