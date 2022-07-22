@@ -1,3 +1,14 @@
+import hashlib
+
+
+def hash(s):
+    """
+    哈希函数  国密 SM2 原版 hash 函数 是 SM3 256 bit，这里只是测试方便
+    :return: 16 进制串 256 bit
+    """
+    sha_obj = hashlib.sha256()
+    sha_obj.update(s.encode())
+    return sha_obj.hexdigest()
 def point2bit(point, mode=True):
     """
     将椭圆曲线上的点转换为比特串
