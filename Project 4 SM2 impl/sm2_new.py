@@ -1,9 +1,8 @@
-import hashlib
 import math
 import random
 import time
 import binascii
-from data_type_transform import point2bit, hex2point, mod_inverse, bin_xor
+from data_type_transform import point2bit, hex2point, mod_inverse, bin_xor, hash
 
 
 class SM2:
@@ -23,7 +22,7 @@ class SM2:
         生成公钥 私钥函数
         :return: 公钥：PB {x,y} 私钥：dB
         """
-        dB = random.randint(1,self.n-1)
+        dB = random.randint(1, self.n - 1)
         PB = self.ecc_multiply(dB, (self.Gx, self.Gy))
         return PB, dB
 
@@ -34,11 +33,9 @@ class SM2:
         :return: True 检测合格 False 检测不合格
         """
         x, y = cipher
-
         # y*y=x*x*x+a*x+b 检测方程
         tmp1 = y * y % self.p
         tmp2 = (x * x * x + self.a * x + self.b) % self.p
-
         if tmp1 == tmp2:
             return True
         else:
@@ -54,24 +51,15 @@ class SM2:
         ct = 1  # 计数器
         K = ''  # 十六进制串
         for i in range(klen // self.v):
-            K += self.hash(Z + bin(ct)[2:].zfill(32))
+            K += hash(Z + bin(ct)[2:].zfill(32))
             ct += 1
         # 取剩余部分
         f_length = klen / self.v
         if math.ceil(f_length) != int(f_length):
-            K += self.hash(Z + bin(ct)[2:].zfill(32))[:(klen - self.v * int(f_length)) // 4]
+            K += hash(Z + bin(ct)[2:].zfill(32))[:(klen - self.v * int(f_length)) // 4]
         # 返回二进制串
         K_binary = bin(int(K, 16))[2:].zfill(klen)
         return K_binary
-
-    def hash(self, s):
-        """
-        哈希函数  国密 SM2 原版 hash 函数 是 SM3 256 bit，这里只是测试方便
-        :return: 16 进制串 256 bit
-        """
-        sha_obj = hashlib.sha256()
-        sha_obj.update(s.encode())
-        return sha_obj.hexdigest()
 
     def ecc_add_same(self, G):
         """
@@ -80,15 +68,12 @@ class SM2:
         :return: 相加之后的点
         """
         x1, y1 = G
-
         # 计算 斜率 k ，k 已不具备明确的几何意义
         tmp1 = 3 * x1 * x1 + self.a
         tmp2 = mod_inverse(2 * y1, self.p)
         k = tmp1 * tmp2 % self.p
-
         # 求 x3
         x3 = (k * k - x1 - x1) % self.p
-
         # 求 y3
         y3 = (k * (x1 - x3) - y1) % self.p
 
@@ -103,18 +88,14 @@ class SM2:
         """
         x1, y1 = G1
         x2, y2 = G2
-
         # 计算 斜率 k
         tmp1 = y2 - y1
         tmp2 = mod_inverse((x2 - x1) % self.p, self.p)
         k = tmp1 * tmp2 % self.p
-
         # 求 x3
         x3 = (k * k - x1 - x2) % self.p
-
         # 求 y3
         y3 = (k * (x1 - x3) - y1) % self.p
-
         return x3, y3
 
     def ecc_add_neighbor(self, point, pointBase):
@@ -132,18 +113,14 @@ class SM2:
         :return: 相乘之后的点
         """
         if k == 1:
-            return G  # 只有 k 取 1 时，才有这种可能
-
+            return G
         if k == 2:
             return self.ecc_add_same(G)
-
         if k == 3:
             return self.ecc_add_diff(G, self.ecc_add_same(G))
-
         if k % 2 == 0:
             return self.ecc_add_same(
-                self.ecc_multiply(k // 2, G))  # return 里只能有一个 oval_multiply 函数，两个及以上很有可能出错，进入无限循环
-
+                self.ecc_multiply(k // 2, G))
         if k % 2 == 1:
             return self.ecc_add_neighbor(self.ecc_multiply(k // 2, G), G)
 
@@ -180,7 +157,7 @@ class SM2:
         # 获取公钥 点
         x, y = pk
         while True:
-            k = random.randint(1 << 50, 1 << 100)
+            k = random.randint(1, self.n - 1)
             # 生成随机数
             C1 = self.ecc_multiply(k, (self.Gx, self.Gy))
             C1_binary = point2bit(C1)
@@ -190,7 +167,7 @@ class SM2:
             if t.count('0') != plain_block_bin_len:
                 break
         C2_binary = bin_xor(plain_block_bin, t)
-        C3_hex = self.hash(C_binary[1] + plain_block_bin + C_binary[2])
+        C3_hex = hash(C_binary[1] + plain_block_bin + C_binary[2])
         C1_hex = hex(int(C1_binary, 2))[2:].zfill(130)
         C2_hex = hex(int(C2_binary, 2))[2:].zfill(plain_block_bin_len // 4)
         return C1_hex + C2_hex + C3_hex
@@ -225,6 +202,10 @@ class SM2:
         C3_hex = cipher_block[-self.v // 4:]
         # C1转换为点
         C1_point = hex2point(C1_hex)
+
+        if not self.test_point(C1_point):
+            exit("error")
+
         dB_mul_C1 = self.ecc_multiply(sk, C1_point)
         C1_binary = point2bit(dB_mul_C1, False)
 
@@ -235,12 +216,18 @@ class SM2:
         # 密钥派生
         t = self.KDF(C1_binary[0], C2_binary_len)
         plain_binary = bin_xor(C2_binary, t)
-        u = self.hash(C1_binary[1] + plain_binary + C1_binary[2])
+        u = hash(C1_binary[1] + plain_binary + C1_binary[2])
 
         if u != C3_hex:
             exit(-1)
         plain_hex = hex(int(plain_binary, 2))[2:].zfill(len(plain_binary) // 4)
         return plain_hex
+
+    def signature(self):
+        pass
+
+    def verify(self):
+        pass
 
 
 if __name__ == '__main__':
@@ -248,7 +235,9 @@ if __name__ == '__main__':
     sm2_obj = SM2()
     key = sm2_obj.key_produce()
     PB, dB = key
-    plain="encryption standard"
+    print('pk:', PB)
+    print('sk', dB)
+    plain = "sdu网络空间安全创新创业实践课程项目4"
     # plain = '123456'
     print('original text:', plain)
     # 加密
