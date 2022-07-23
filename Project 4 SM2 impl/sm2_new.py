@@ -2,7 +2,7 @@ import math
 import random
 import time
 import binascii
-from data_type_transform import point2bit, hex2point, mod_inverse, bin_xor, hash
+from utils import point2bit, hex2point, mod_inverse, bin_xor, hash, int2bytes, bytes2int,get_Z
 
 
 class SM2:
@@ -223,11 +223,59 @@ class SM2:
         plain_hex = hex(int(plain_binary, 2))[2:].zfill(len(plain_binary) // 4)
         return plain_hex
 
-    def signature(self):
-        pass
+    def signify(self, M, IDA, dA, PA):
+        """
+        签名算法
+        :param M:字符串
+        :param IDA:A用户标识
+        :param dA:私钥
+        :param PA:公钥
+        :return:签名
+        """
+        ZA = get_Z(IDA, PA)
+        # A1
+        M_ = ZA + M
+        # A2
+        e = hash(M_)  # 返回十六进制字符串
+        e = int(e, 16)  # 十六进制字符串转换为整数
+        r = 0
+        k = 0
+        while r == 0 or r + k == self.n:
+            # A3
+            k = random.randint(1, self.n - 1)
+            # A4
+            x1 = self.ecc_multiply(k, (self.Gx, self.Gy))[0]
+            # A5
+            r = (e + x1) % self.n
+        # A6
+        s = mod_inverse(self.n, 1 + dA)
+        # A7
+        r = int2bytes(r, math.ceil(math.log(self.n, 2) / 8))
+        s = int2bytes(s, math.ceil(math.log(self.n, 2) / 8))
+        return r, s
 
-    def verify(self):
-        pass
+    def verify(self, M, sig, IDA, PA):
+        ZA = get_Z(IDA, PA)
+        r = sig[0]
+        s = sig[1]
+        r = bytes2int(r)
+        s = bytes2int(s)
+        if r < 1 or r > self.n - 1 or s < 1 or s > self.n - 1:
+            return False
+        M_ = ZA + M
+        e = hash(M_)
+        e = int(e, 16)
+        t = (r + s) % self.n
+        if t == 0:
+            print('some errors occurred.')
+            return False
+        x1 = self.ecc_add_diff(self.ecc_multiply(s, (self.Gx, self.Gy)), self.ecc_multiply(t, PA))[0]
+        R = (e + x1) % self.n
+        if R != r:
+            print('some errors occurred.')
+            return False
+        print('verified successfully.')
+        return True
 
 
 if __name__ == '__main__':
@@ -253,3 +301,21 @@ if __name__ == '__main__':
         print("some errors occurred.")
 
     print("time cost:", time.time() - start)
+
+    ### test Signature ###
+    #
+    dA = dB
+    PA = PB
+    IDA = '201900301107@mail.sdu.edu.cn'
+    M = "sdu网络空间安全创新创业实践课程项目4"
+    Sig = sm2_obj.signify(M, IDA, dA, PA)
+    print('message:', M)
+    print('IDA:', IDA)
+    print('signature:')
+    print('r:', Sig[0])
+    print('s:', Sig[1])
+    print('verification(valid):')
+    sm2_obj.verify(M, Sig, IDA, PA)
+    print('verification(invalid):')
+    M='sdu网络空间安全创新创业实践课程项目5'
+    sm2_obj.verify(M, Sig, IDA, PA)
