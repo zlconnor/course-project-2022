@@ -9,6 +9,8 @@ def hash(s):
     sha_obj = hashlib.sha256()
     sha_obj.update(s.encode())
     return sha_obj.hexdigest()
+
+
 def point2bit(point, mode=True):
     """
     将椭圆曲线上的点转换为比特串
@@ -78,3 +80,36 @@ def mod_inverse(n, p):
         i -= 1
 
     return div_b % a[0]
+
+
+def int2bytes(x, k):
+    # print("--- 整数到字节串的转换 ---")
+    # temp = x
+    # i = k - 1
+    M = []
+    for i in range(0, k):
+        M.append(x >> (i * 8) & 0xff)
+    M.reverse()
+    '''
+	M = ''
+	while (i >= 0):
+		a = temp // (2**(8*i))
+		M = M + str(a)
+		temp = temp - a * (2**(8*i))
+		i = i - 1
+	'''
+    return M
+
+def bytes2int(M):
+	#print("--- 字节串到整数的转换 ---")
+	#k = int(len(M))
+	#i = 0
+	x = 0
+	for b in M:
+		x = x * 256 + int(b)
+	'''
+	while (i < k):
+		x = x + int( M[k-i-1:k-i] ) * (2**(8*i)) 
+		i = i + 1
+	'''
+	return x
