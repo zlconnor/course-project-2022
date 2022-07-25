@@ -77,7 +77,7 @@ PGP加密由一系列散列函数、数据压缩、对称密钥加密以及公�
 
 #### 项目代码说明
 
-![image-20220725125308761](\document.assets\image-20220725125333921.png)
+![image-20220725125308761](https://github.com/zlconnor/course-project-2022/blob/master/document.assets/image-20220725125333921.png)
 
 ![image-20220725125316810](F:\course-project-2022\document.assets\image-20220725125316810.png)
 
