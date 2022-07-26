@@ -1,4 +1,5 @@
 # 网络空间安全创新创业实践课程项目说明
+# （详细项目报告见各项目文件夹中的Report \*.pdf文件）
 
 ## 成员信息
 
@@ -69,7 +70,7 @@ PGP加密由一系列散列函数、数据压缩、对称密钥加密以及公�
 
 项目四：SM2实现 中尚未实现密钥交换协议。
 
-项目六：为了简便未加入Socket封装。
+项目六：PGP方案实现 为了简便未加入Socket封装。
 
 ## 项目报告
 
@@ -107,6 +108,8 @@ PGP加密由一系列散列函数、数据压缩、对称密钥加密以及公�
 
 #### 贡献情况
 
+本项目全部由[张麟康](https://github.com/zlconnor)完成。
+
 ### 项目二 SM3 Rho Method
 
 #### 项目代码说明
@@ -126,6 +129,8 @@ PGP加密由一系列散列函数、数据压缩、对称密钥加密以及公�
 ![image-20220725124513981](Https://github.com/zlconnor/course-project-2022/blob/master/document.assets/image-20220725124513981.png)
 
 #### 贡献情况
+
+本项目全部由[张麟康](https://github.com/zlconnor)完成。
 
 ### 项目三 Merkle Tree实现
 
@@ -170,6 +175,8 @@ PGP加密由一系列散列函数、数据压缩、对称密钥加密以及公�
 ![image-20220725124810444](Https://github.com/zlconnor/course-project-2022/blob/master/document.assets/image-20220725124810444.png)
 
 #### 贡献情况
+
+本项目全部由[张麟康](https://github.com/zlconnor)完成。
 
 ### 项目四 SM2实现
 
@@ -231,6 +238,8 @@ PGP加密由一系列散列函数、数据压缩、对称密钥加密以及公�
 
 #### 贡献情况
 
+本项目全部由[张麟康](https://github.com/zlconnor)完成。
+
 ### 项目五 SM3长度扩展攻击
 
 #### 项目代码说明
@@ -252,6 +261,8 @@ PGP加密由一系列散列函数、数据压缩、对称密钥加密以及公�
 ![image-20220725124354511](Https://github.com/zlconnor/course-project-2022/blob/master/document.assets/image-20220725124354511.png)
 
 #### 贡献情况
+
+本项目全部由[张麟康](https://github.com/zlconnor)完成。
 
 ### 项目六 PGP方案实现
 
@@ -296,3 +307,5 @@ PGP加密由一系列散列函数、数据压缩、对称密钥加密以及公�
 ![image-20220725124221054](Https://github.com/zlconnor/course-project-2022/blob/master/document.assets/image-20220725124221054.png)
 
 #### 贡献情况
+
+本项目全部由[张麟康](https://github.com/zlconnor)完成。
